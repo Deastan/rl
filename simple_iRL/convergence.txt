@@ -1,0 +1,44 @@
+roboticlab14@roboticlab14:~/Documents/RL/iRL$ cd /home/roboticlab14/Documents/RL/simple_iRL ; env PYTHONIOENCODING=UTF-8 PYTHONUNBUFFERED=1 /usr/local/bin/python3 /home/roboticlab14/.vscode/extensions/ms-python.python-2019.5.17517/pythonFiles/ptvsd_launcher.py --default --client --host localhost --port 44210 /home/roboticlab14/Documents/RL/simple_iRL/learning_frozen_lake.py 
+Start
+<FrozenLakeEnv<FrozenLakeNotSlippery-v0>>
+Ovservation space:  16
+Action space:  4
+Max episodes:  15000
+[[ 0.20527567  0.32134281  0.32134281  0.20527567]
+ [ 0.20527567 -1.          0.44351875  0.32134281]
+ [ 0.32134281  0.572125    0.32134281  0.44351875]
+ [ 0.44351875 -0.9999999   0.32134247  0.32107567]
+ [ 0.32134281  0.44351875 -1.          0.20527567]
+ [ 0.          0.          0.          0.        ]
+ [-1.          0.7075     -1.          0.44351875]
+ [ 0.          0.          0.          0.        ]
+ [ 0.44351875 -1.          0.572125    0.32134281]
+ [ 0.44351875  0.7075      0.7075     -1.        ]
+ [ 0.572125    0.85       -1.          0.572125  ]
+ [ 0.          0.          0.          0.        ]
+ [ 0.          0.          0.          0.        ]
+ [-1.          0.7075      0.85        0.572125  ]
+ [ 0.7075      0.85        1.          0.7075    ]
+ [ 0.          0.          0.          0.        ]]
+roboticlab14@roboticlab14:~/Documents/RL/simple_iRL$ cd /home/roboticlab14/Documents/RL/simple_iRL ; env PYTHONIOENCODING=UTF-8 PYTHONUNBUFFERED=1 /usr/local/bin/python3 /home/roboticlab14/.vscode/extensions/ms-python.python-2019.5.17517/pythonFiles/ptvsd_launcher.py --default --client --host localhost --port 42894 /home/roboticlab14/Documents/RL/simple_iRL/learning_frozen_lake.py 
+Start
+<FrozenLakeEnv<FrozenLakeNotSlippery-v0>>
+Ovservation space:  16
+Action space:  4
+Max episodes:  15000000
+[[ 0.20527567  0.32134281  0.32134281  0.20527567]
+ [ 0.20527567 -1.          0.44351875  0.32134281]
+ [ 0.32134281  0.572125    0.32134281  0.44351875]
+ [ 0.44351875 -0.99999949  0.28834129  0.32018131]
+ [ 0.32134281  0.44351875 -1.          0.20527567]
+ [ 0.          0.          0.          0.        ]
+ [-1.          0.7075     -1.          0.44351875]
+ [ 0.          0.          0.          0.        ]
+ [ 0.44351875 -1.          0.572125    0.32134281]
+ [ 0.44351875  0.7075      0.7075     -1.        ]
+ [ 0.572125    0.85       -1.          0.572125  ]
+ [ 0.          0.          0.          0.        ]
+ [ 0.          0.          0.          0.        ]
+ [-1.          0.7075      0.85        0.572125  ]
+ [ 0.7075      0.85        1.          0.7075    ]
+ [ 0.          0.          0.          0.        ]]
