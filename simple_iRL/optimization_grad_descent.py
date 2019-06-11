@@ -107,17 +107,29 @@ def load(name="demos_default_name"):
         return empty
 
 # Return the calculated cost function
-def cal_cost_function(x, y, theta):
+def cal_cost_function(list_demos):
     '''
     Calculates the cost function for the given parameters.
     
     Input:
         - Theta
+        - List demos
     
     Ouput:
         - Cost function
     '''
     print("cal_cost_function")
+    # numberDemos = 5
+    numberDemos = len(list_demos)
+    # demos = 5
+    for i in range(list_demos):
+        m = len(list_demos[i]) - 1 # because of init 
+        z_interm = 0
+        for j in range(1, m + 1):
+            z_interm = 0
+
+        z_theta = 1/m
+        -math.log1p(z_theta)
     cost = 1
     # end of cal_cost_function
 
@@ -166,7 +178,16 @@ def main():
     print("Main start!")
 
     # cal_cost_function()
-    grad_descent()
+    # grad_descent()name = name + ".pkl"
+    name = "demos_frozenLake_test.pkl"
+    with open(name, 'rb') as f:
+        list_demos = pickle.load(f)
+    
+    print(list_demos)
+    print("Nombre de demos:", len(list_demos))
+
+    print("Nombre de point sur la trajectoire: ", len(list_demos[1]))
+    print(list_demos[0][2][0])
 
     print("Main end!")
 

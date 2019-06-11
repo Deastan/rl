@@ -78,7 +78,7 @@ def main():
     
     list_demos = []
     # list_states = []
-    np_oneDemo = np.array([[0, 0, 0]])
+    np_oneDemo = np.array([[1, 1, 0]])
     print(np_oneDemo)
     # list_oneDemo = []
     # list_actions = []
@@ -149,8 +149,8 @@ def main():
             if action !=-1:
                 new_state, reward, done, info = env.step(action)
                 nomber_of_move += 1
-                print(done)
-                x, y = state_to_xy(new_state)
+                # print(done)
+                x, y = state_to_xy(state) #new_state
                 np_oneDemo = np.append(np_oneDemo, [[x, y, action]], axis=0)
                 
                 state = new_state
