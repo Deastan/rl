@@ -90,6 +90,7 @@ def main():
         done = False
         state = env.reset()
         env.render()
+        np_oneDemo = np.array([[1, 1, 0]])
         while not done:
             # LEFT = 0
             # DOWN = 1
@@ -154,10 +155,13 @@ def main():
                 np_oneDemo = np.append(np_oneDemo, [[x, y, action]], axis=0)
                 
                 state = new_state
+                if done:
+                    x, y = state_to_xy(new_state) #new_state
+                    np_oneDemo = np.append(np_oneDemo, [[x, y, action]], axis=0)
                 env.render()
             action = -1
         # End off steps
-        
+        # list_demos.append(np_oneDemo)
         if quit != True:
             # we don't want the last one
             

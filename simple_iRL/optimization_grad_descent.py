@@ -107,7 +107,7 @@ def load(name="demos_default_name"):
         return empty
 
 # Return the calculated cost function
-def cal_cost_function(list_demos):
+def cal_cost_function(list_demos, np_theta):
     '''
     Calculates the cost function for the given parameters.
     
@@ -118,24 +118,29 @@ def cal_cost_function(list_demos):
     Ouput:
         - Cost function
     '''
-    print("cal_cost_function")
+    print("cal_cost_function()")
     # numberDemos = 5
-    numberDemos = len(list_demos)
-    # demos = 5
-    for i in range(list_demos):
+    # numberDemos = len(list_demos)
+    # np_theta = np.array([0.5, 0.1])
+    cost = 0
+    for i in range(0, len(list_demos)):
         m = len(list_demos[i]) - 1 # because of init 
         z_interm = 0
-        for j in range(1, m + 1):
-            z_interm = 0
-
-        z_theta = 1/m
-        -math.log1p(z_theta)
-    cost = 1
+        beta = 0
+        for j in range(1, m - 1):
+            beta += np_theta[0]*list_demos[i][j][0] + np_theta[1]*list_demos[i][j][1]
+            z_interm += math.exp(-beta)
+        
+        z_theta = 1/m * z_interm
+        print("z_theta: ", z_theta)
+        cost += beta - math.log1p(z_theta) 
+        
+    return cost
     # end of cal_cost_function
 
 
 # Gradient descent function
-def grad_descent(learning_rate=0.01, iterations=100):
+def grad_descent(list_demos, learning_rate=0.0001, iterations=10):
     '''
     Calculates iteratively the gradient
 
@@ -156,19 +161,59 @@ def grad_descent(learning_rate=0.01, iterations=100):
 
     Output: 
     '''
+    print("grad_descent()")
+    np_theta = 10*np.array([np.random.random_sample(), np.random.random_sample()])
+    # print("grad_descent")
+    # theta = np.random.randn(7, 1)
+    print("theta random", np_theta)
 
-    print("grad_descent")
-    theta = np.random.randn(7, 1)
-    print(theta)
+    cost_history = np.zeros(iterations)
+    theta_history = np.zeros((iterations,2))
+   
 
+    loss_deriv_theta_1 = 0
+    loss_deriv_theta_2 = 0
 
-    for i in range(iterations):
-        print("inside loops: ", i)
+    for it in range(iterations):
+
+        # Demos
+        for i in range(0, len(list_demos)):
+            m = len(list_demos[i]) - 1 # because of init 
+
+            loss_deriv_theta_1_interm = 0
+            loss_deriv_theta_2_interm = 0
+            sumExpMinusThetaDotStates = 0
+            for j in range(1, m-1):
+                thetaDotState = np_theta[0]*list_demos[i][j][0] + np_theta[1]*list_demos[i][j][1]
+                sumExpMinusThetaDotStates += math.exp(-thetaDotState)
+            print("sumExpMinusThetaDotStates: ", sumExpMinusThetaDotStates)
+            # States of a trajectory
+            for j in range(1, m - 1):
+
+                thetaDotState = np_theta[0]*list_demos[i][j][0] + np_theta[1]*list_demos[i][j][1]
+                print("thetaDotState: ", thetaDotState)
+                loss_deriv_theta_1_interm += list_demos[i][j][0] - list_demos[i][j][0] * math.exp(-thetaDotState) / sumExpMinusThetaDotStates 
+                loss_deriv_theta_2_interm += list_demos[i][j][1] - list_demos[i][j][1] * math.exp(-thetaDotState) / sumExpMinusThetaDotStates 
+
+            #end over the states
+            
+            loss_deriv_theta_1 += loss_deriv_theta_1_interm
+            loss_deriv_theta_2 += loss_deriv_theta_2_interm
+        #end over the demo
+
+        np_theta[0] = np_theta[0] - learning_rate * loss_deriv_theta_1
+        np_theta[1] = np_theta[1] - learning_rate * loss_deriv_theta_2        
+        print("theta 1: ", np_theta[0], ", theta 2: ", np_theta[1])
+        theta_history[it] = np_theta
+        cost_history[it] = cal_cost_function(list_demos, np_theta)
+        # loss_deriv_theta_1 = 1
+        # loss_deriv_theta_1 = 1
+        
         
 
     # end of the for
 
-    return theta
+    return np_theta
     # end of grad_descend
 
 
@@ -179,7 +224,7 @@ def main():
 
     # cal_cost_function()
     # grad_descent()name = name + ".pkl"
-    name = "demos_frozenLake_test.pkl"
+    name = "demos_frozenLake_test_3.pkl"
     with open(name, 'rb') as f:
         list_demos = pickle.load(f)
     
@@ -187,17 +232,21 @@ def main():
     print("Nombre de demos:", len(list_demos))
 
     print("Nombre de point sur la trajectoire: ", len(list_demos[1]))
-    print(list_demos[0][2][0])
+    print(list_demos[0][2][1])
 
+    # print("Cost function: ", cal_cost_function(list_demos))
+
+    print("Theta: ", grad_descent(list_demos))
     print("Main end!")
 
 #***********************************
 #       Main
 #***********************************
 if __name__ == '__main__':
-    try:
-        main()
-        print("Main function worked fine!")
-    except:
-        print("ERROR: couldn't run the main function!")
+    main()
+    # try:
+    #     main()
+    #     print("Main function worked fine!")
+    # except:
+    #     print("ERROR: couldn't run the main function!")
     
