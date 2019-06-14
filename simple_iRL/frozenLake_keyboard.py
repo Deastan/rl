@@ -49,6 +49,8 @@ def load(name="demos_default_name"):
 
 def state_to_xy(state):
     # print("New state is: ", state)
+    # x direction is 0 1 2 3
+    # y direction is 0 4 8 12 
     x = (state) % 4 + 1 
     y = int(math.modf((state) / 4)[1]) + 1
     # print("Cartesian ( ", x, ", ", y, ")", end='\n')
