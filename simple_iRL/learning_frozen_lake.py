@@ -7,9 +7,7 @@ import time
 import gym
 import numpy as np
 import matplotlib.pyplot as plt
-
 # from openai_ros.openai_ros_common import StartOpenAI_ROS_Environment
-
 # save part
 import time, pickle, os
 
@@ -32,6 +30,11 @@ def take_action(action_1, env):
    return new_state, reward_update, done, info
 
 def init_env():
+   '''
+   Init the env from gym
+
+   Output: gym env
+   '''
    # Remove the idea that the agent can iceskate...
    # Simplify the problem
    register(
@@ -44,6 +47,9 @@ def init_env():
    return env
 
 def qlearning(env):
+   '''
+   Agent learns using q-learning
+   '''
    state_size = env.observation_space.n
    action_size = env.action_space.n
     # Use the Q-learning method
@@ -52,7 +58,8 @@ def qlearning(env):
    # matrix state_size by action_size 
    # Here it will be 16 x 4
    Q_table = np.zeros((state_size, action_size))
-   # Table with the reward..
+   # Table with the reward and episode to allow me 
+   # to plot a graph if needed
    rewards = []
    episode_list = []
 
@@ -137,8 +144,8 @@ def main():
    # plt.close() 
 
 if __name__ == '__main__':
-   main()
-   # try:
-   #    main()
-   # except:
-   #    print("ERROR: Cannot run the main")
+   # main()
+   try:
+      main()
+   except:
+      print("ERROR: Cannot run the main")
