@@ -31,9 +31,7 @@ def take_action(action_1, env):
    # print(new_state)
    return new_state, reward_update, done, info
 
-if __name__ == '__main__':
-
-   print("Start")
+def init_env():
    # Remove the idea that the agent can iceskate...
    # Simplify the problem
    register(
@@ -43,13 +41,12 @@ if __name__ == '__main__':
    )
 
    env = gym.make("FrozenLakeNotSlippery-v0")
-   print(env)
+   return env
+
+def qlearning(env):
    state_size = env.observation_space.n
    action_size = env.action_space.n
-   print("Ovservation space: ", state_size)
-   print("Action space: ", action_size)
-
-   # Use the Q-learning method
+    # Use the Q-learning method
 
    # Create the q learnign table
    # matrix state_size by action_size 
@@ -82,7 +79,7 @@ if __name__ == '__main__':
       # print(state)
       done = False
       total_rewards = 0
-      print("************************")
+      # print("************************")
       while not done:
          # step 1
          if random.uniform(0, 1) < EPSILON:
@@ -109,7 +106,7 @@ if __name__ == '__main__':
          total_rewards += R
          step += 1
          
-         env.render()
+         # env.render()
          # time.sleep(0.1)
 
       EPSILON = MIN_EPSILON + (MAX_EPSILON - MIN_EPSILON) * np.exp(-DECAY_RATE * episode)
@@ -118,7 +115,11 @@ if __name__ == '__main__':
       episode_list.append(episode)
    
    print(Q_table)
+   return Q_table, rewards, episode_list
 
+def main():
+   env = init_env()
+   Q_table, rewards, episode_list = qlearning(env)
 
    # Save datas
    with open("frozenLake_qTable_15000.pkl", 'wb') as f:
@@ -135,3 +136,9 @@ if __name__ == '__main__':
    plt.show()
    # plt.close() 
 
+if __name__ == '__main__':
+   main()
+   # try:
+   #    main()
+   # except:
+   #    print("ERROR: Cannot run the main")

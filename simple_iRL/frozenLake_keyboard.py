@@ -13,7 +13,6 @@ import sys, termios, tty, os, time #method 3
 
 # save part
 import time, pickle, os
-
 from gym.envs.registration import register
 
 # Listen the event and the keyboard and return the keboard caracter
@@ -58,8 +57,7 @@ def state_to_xy(state):
 
 
 def main():
-    # Remove the idea that the agent can iceskate...
-    # Simplify the problem
+    # Simplify the problem without proba because of the slip of the ice
     register(
         id="FrozenLakeNotSlippery-v0",
         entry_point='gym.envs.toy_text:FrozenLakeEnv',
