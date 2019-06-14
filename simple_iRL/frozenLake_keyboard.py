@@ -1,3 +1,7 @@
+# Jonathan Burkhard
+# IRL
+# Work on python3 !!!
+# TODO: 
 import random
 import time
 import gym
@@ -184,5 +188,8 @@ def main():
 #       Main
 #***********************************
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except:
+        print("ERROR: Cannot run the main")
     

@@ -1,3 +1,7 @@
+# Jonathan Burkhard
+# IRL
+# TODO: Create more function here...
+
 import random
 import time
 import gym

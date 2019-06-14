@@ -67,9 +67,8 @@ math.sin(x):
 
 math.tan(x):
     Return the tangent of x radians.
-
-
 '''
+
 import random
 import time
 import gym
@@ -77,10 +76,8 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 
-
 # This is the 3D plotting toolkit
 from mpl_toolkits.mplot3d import Axes3D
-
 
 import sys, termios, tty, os, time #method 3
 # from openai_ros.openai_ros_common import StartOpenAI_ROS_Environment
@@ -163,9 +160,15 @@ def grad_descent(list_demos, learning_rate=0.00001, iterations=25):
     4) Repeat until the cost J(w) stops reducing, or some other pre-defined 
         termination criteria is met.
 
-    Input:
+    Inputs:
+            list_demos:
+            learning_rate=0.00001:
+            iterations=25:
 
     Output: 
+            np_theta
+            theta_history
+            cost_history
     '''
     # print("grad_descent()")
     
@@ -228,7 +231,7 @@ def grad_descent(list_demos, learning_rate=0.00001, iterations=25):
         # loss_deriv_theta_1 = 1
         it+=1
         
-    plot(cost_history)
+    # plot(cost_history)
     # end of the for
     print("Number of iteration: ", it)
     return np_theta, theta_history, cost_history
@@ -236,6 +239,9 @@ def grad_descent(list_demos, learning_rate=0.00001, iterations=25):
 
 
 def plot(cost_history):
+    '''
+    Cost history. 
+    '''
 
     plt.plot(cost_history)
     plt.xlabel('Iterations')
@@ -245,6 +251,11 @@ def plot(cost_history):
     plt.show()
 
 def plot3D(list_demos):
+    '''
+    Plot the cose function
+    Input: list_demos which is the recorded demos from an expert
+    Output: 3D plot
+    '''
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -262,9 +273,15 @@ def plot3D(list_demos):
     plt.show()
 
 def rewardFunction(np_theta, x, y):
+    '''
+    Return the reward for the theta, and the state
+    '''
     return x*np_theta[0]+y*np_theta[1]
 
 def rewardGrid(np_theta):
+    '''
+    Show what is the reward for each state in the grid
+    '''
     
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -281,9 +298,7 @@ def rewardGrid(np_theta):
     plt.show()
 
 def main():
-    print("Main start!")
-
-    # cal_cost_function()
+    # Open the demos files
     # grad_descent()name = name + ".pkl"
     name = "demos_frozenLake_test_3.pkl"
     with open(name, 'rb') as f:
@@ -303,7 +318,7 @@ def main():
     # print("Cost History: ", cost_history)
     
     # Show the cost function
-    # plot3D(list_demos)
+    plot3D(list_demos)
 
     #show the gridReward
     rewardGrid(np_theta)
@@ -314,10 +329,12 @@ def main():
 #       Main
 #***********************************
 if __name__ == '__main__':
-    main()
-    # try:
-    #     main()
-    #     print("Main function worked fine!")
-    # except:
-    #     print("ERROR: couldn't run the main function!")
+    # main()
+    try:
+        main()
+        print("Main function worked fine!")
+    except:
+        # Maybe save the files, lists etc... here
+        # save(list_theta, name="theta_default_name")
+        print("ERROR: couldn't run the main function!")
     
