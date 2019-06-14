@@ -173,7 +173,7 @@ def cal_cost_function_v2(list_demos, np_theta):
         # print("z_theta: ", z_theta)
         cost += beta - math.log1p(z_theta) 
         
-    return cost
+    return -cost
     # end of cal_cost_function
 
 
@@ -274,7 +274,7 @@ def grad_descent(list_demos, learning_rate=0.00001, iterations=25):
 
 # Gradient descent function v2
 # Use features function
-def grad_descent_v2(list_demos, learning_rate=0.000001, iterations=20):
+def grad_descent_v2(list_demos, learning_rate=0.000001, iterations=200):
     '''
     Calculates iteratively the gradient
 
@@ -437,7 +437,7 @@ def features_states(x,y):
     np_features = np.append(np_features, int_start)
     np_features = np.append(np_features, int_goal)
     np_features = np.append(np_features, int_not_hole)
-    # np_features = np.append(np_features, int_hole)
+    np_features = np.append(np_features, int_hole)
     # np_features = np.append(np_features, x*x)
     # np_features = np.append(np_features, y*y)
     # np_features = np.append(np_features, x*y)
@@ -547,6 +547,28 @@ def plot3D(list_demos):
 
     plt.show()
 
+# def plot3D_v2(list_demos):
+#     '''
+#     Plot the cose function
+#     Input: list_demos which is the recorded demos from an expert
+#     Output: 3D plot
+#     '''
+
+#     fig = plt.figure()
+#     ax = fig.add_subplot(111, projection='3d')
+#     x = y = np.arange(-1.0, 5.0, 0.05)
+#     X, Y = np.meshgrid(x, y)
+#     zs = np.array([cal_cost_function_v2(list_demos, np.array([x,y])) for x,y in zip(np.ravel(X), np.ravel(Y))])
+#     Z = zs.reshape(X.shape)
+
+#     ax.plot_surface(X, Y, Z)
+
+#     ax.set_xlabel('X Label')
+#     ax.set_ylabel('Y Label')
+#     ax.set_zlabel('Z Label')
+
+#     plt.show()
+
 def rewardFunction(np_theta, x, y):
     '''
     Return the reward for the theta, and the state
@@ -625,6 +647,7 @@ def main():
     
     # Show the cost function
     # plot3D(list_demos)
+    # plot3D_v2(list_demos)
 
     #show the gridReward
     # rewardGrid(np_theta)
