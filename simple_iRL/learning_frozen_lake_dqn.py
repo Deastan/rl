@@ -397,15 +397,9 @@ def choose_action(model, state, action_space, exploration_rate):
 
 def DNNlearning_keras(env):
    '''
-   function which is a neural net with only one hidden layer.
-   It multiply the weight matrix with the state vector to obtain the matrix of Q
-   Then at the predict, caltulate the argmax of Q vector (four line) and obtain 
-   predicted action
+   function which is a neural net using Keras
    '''
-   # Experience replay:
-   memory = deque(maxlen=MEMORY_SIZE)
-
-
+ 
    #PARAMS
    GAMMA = 0.95
    LEARNING_RATE = 0.001
@@ -417,45 +411,172 @@ def DNNlearning_keras(env):
 
    # Env params
    observation_space = 16
+   # observation_space = env.observation_space
    action_space = 4
+
    exploration_rate = EXPLORATION_MAX
+
    # Model params
    model = Sequential()
-   model.add(Dense(16, input_shape=(observation_space), activation="relu"))
+   model.add(Dense(16, input_shape=(observation_space,), activation="relu"))
    model.add(Dense(16, activation="relu"))
    model.add(Dense(action_space, activation="linear"))
    model.compile(loss="mse", optimizer=Adam(lr=LEARNING_RATE))
 
-   episode_max = 1000
+   # Experience replay:
+   # memory = deque(maxlen=MEMORY_SIZE)
+
+   episode_max = 10000
    done = False
    for i in range(episode_max):
       total_reward = 0
       j = 0
       state = env.reset()
-      while j<15 and not done: # step inside an episode
+      # state = np.reshape(state, [1, observation_space])
+      state = np.identity(16)[state:state+1]
+      done = False
+      while j < 15 and not done: # step inside an episode
          j+=1
-         print("A")
+         print("[INFO]: episode: ", i, ", step: ", j)
 
          action = choose_action(model, state, action_space, exploration_rate)
+         # print(action)
          new_state, reward, done, info = take_action(action, env)
+         new_state = np.identity(16)[new_state:new_state+1]
+         # (np.max(model.predict(new_state)))
+         # q_target = reward + GAMMA * (np.max(model.predict(new_state)))
+         if not done:
+            q_target = reward + GAMMA * (np.amax(model.predict(new_state)))#(np.amax(model.predict(new_state)))
+         else:
+            #if done
+            q_target = reward
+
+         q_value = model.predict(state)
+         q_value[0][action] = q_target
+         model.fit(state, q_value, verbose=0)
          
-         if done:
-            reward += reward
-
-
-
+         
+         # if done:
+         #    reward += reward
+         
+         state = new_state
+         total_reward += reward
    
    #Test algo
    print("***********Prediction***************")
-   prediction = False
+   prediction = True
    if prediction == True:
       done = False
       t = 0
       state = env.reset()
+      state = np.identity(16)[state:state+1]
       while not done:
          #ACTION TO SET
-         # a = sess.run([predict],feed_dict={inputs1:np.identity(16)[state:state+1]})
-         new_state, r, done, _ = take_action(3, env)
+         action = model.predict(state)
+         new_state, reward, done, _ = take_action(np.argmax(action), env)
+         new_state = np.identity(16)[new_state:new_state+1]         
+         env.render()
+         state = new_state
+         t+=1
+      # print(W1)
+#end function
+
+def save_forReplay(memory, state, action, reward, new_state, done):
+   memory.append((state, action, reward, new_state, done))
+   return memory
+
+def experience_replay(model, memory, 
+      BATCH_SIZE, exploration_rate, EXPLORATION_DECAY, EXPLORATION_MIN, GAMMA):
+   if len(memory) < BATCH_SIZE:
+      return
+   batch = random.sample(memory, BATCH_SIZE)
+   # print(batch)
+   for state, action, reward, new_state, done in batch:
+      # print("Inside replay")
+      if not done:
+         q_target = (reward + GAMMA * np.amax(model.predict(new_state)))
+      else:
+         q_target = reward
+
+      q_values = model.predict(state)
+      q_values[0][action] = q_target
+      model.fit(state, q_values, verbose=0)
+
+   exploration_rate *= EXPLORATION_DECAY
+   exploration_rate = max(EXPLORATION_MIN, exploration_rate)
+   # return model
+
+def DDN_learning_keras_memoryReplay(env):
+   '''
+   function which is a neural net using Keras
+   '''
+   EPISODE_MAX = 100
+   #PARAMS
+   GAMMA = 0.95
+   LEARNING_RATE = 0.001
+   MEMORY_SIZE = EPISODE_MAX
+   BATCH_SIZE = 20
+   EXPLORATION_MAX = 1.0
+   EXPLORATION_MIN = 0.01
+   EXPLORATION_DECAY = 0.995
+
+   # Env params
+   observation_space = 16
+   # observation_space = env.observation_space
+   action_space = 4
+
+   exploration_rate = EXPLORATION_MAX
+
+   # Model params
+   model = Sequential()
+   model.add(Dense(16, input_shape=(observation_space,), activation="relu"))
+   model.add(Dense(16, activation="relu"))
+   model.add(Dense(action_space, activation="linear"))
+   model.compile(loss="mse", optimizer=Adam(lr=LEARNING_RATE))
+
+   # Experience replay:
+   memory = deque(maxlen=MEMORY_SIZE)
+
+   episode_max = EPISODE_MAX
+   done = False
+   for i in range(episode_max):
+      total_reward = 0
+      j = 0
+      state = env.reset()
+      # state = np.reshape(state, [1, observation_space])
+      state = np.identity(16)[state:state+1]
+      done = False
+      while j < 15 and not done: # step inside an episode
+         j+=1
+         print("[INFO]: episode: ", i, ", step: ", j)
+
+         action = choose_action(model, state, action_space, exploration_rate)
+         # print(action)
+         new_state, reward, done, info = take_action(action, env)
+         new_state = np.identity(16)[new_state:new_state+1]
+
+         # Momory replay
+         # memory = save_forReplay(memory, state, action, reward, new_state, done)
+         save_forReplay(memory, state, action, reward, new_state, done)
+         experience_replay(model, memory, 
+            BATCH_SIZE, exploration_rate, EXPLORATION_DECAY, EXPLORATION_MIN, GAMMA)
+
+         state = new_state
+         total_reward += reward
+   
+   #Test algo
+   print("***********Prediction***************")
+   prediction = True
+   if prediction == True:
+      done = False
+      t = 0
+      state = env.reset()
+      state = np.identity(16)[state:state+1]
+      while not done:
+         #ACTION TO SET
+         action = model.predict(state)
+         new_state, reward, done, _ = take_action(np.argmax(action), env)
+         new_state = np.identity(16)[new_state:new_state+1]         
          env.render()
          state = new_state
          t+=1
@@ -467,7 +588,8 @@ def main():
    # qlearning(env)
    # NNlearning(env)
    # DNNlearning(env)
-   DNNlearning_keras(env)
+   # DNNlearning_keras(env)
+   DDN_learning_keras_memoryReplay(env)
    
 
 
