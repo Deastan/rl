@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 import math
 
+
 # from openai_ros.openai_ros_common import StartOpenAI_ROS_Environment
 
 # save part
@@ -388,6 +389,11 @@ from collections import deque
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.optimizers import Adam
+# from keras.callbacks import TensorBoard
+# tensorboard = TensorBoard(log_dir='./logs', histogram_freq=0,
+#                           write_graph=True, write_images=False)
+# keras.callbacks.RemoteMonitor(root='http://localhost:9000', path='/publish/epoch/end/', field='data', headers=None, send_as_json=False)
+
 
 def choose_action(model, state, action_space, exploration_rate):
    if np.random.rand() < exploration_rate:
@@ -395,6 +401,7 @@ def choose_action(model, state, action_space, exploration_rate):
    q_values = model.predict(state)
    return np.argmax(q_values[0])
 
+# Neural network with 2 hidden layer using Keras
 def DNNlearning_keras(env):
    '''
    function which is a neural net using Keras
@@ -500,17 +507,18 @@ def experience_replay(model, memory,
 
       q_values = model.predict(state)
       q_values[0][action] = q_target
-      model.fit(state, q_values, verbose=0)
+      model.fit(state, q_values, verbose=1)#, callbacks=[tensorboard])
 
    exploration_rate *= EXPLORATION_DECAY
    exploration_rate = max(EXPLORATION_MIN, exploration_rate)
    # return model
 
+# Neural network with 2 hidden layer using Keras + experience replay
 def DDN_learning_keras_memoryReplay(env):
    '''
    function which is a neural net using Keras
    '''
-   EPISODE_MAX = 100
+   EPISODE_MAX = 10
    #PARAMS
    GAMMA = 0.95
    LEARNING_RATE = 0.001
@@ -572,7 +580,7 @@ def DDN_learning_keras_memoryReplay(env):
       t = 0
       state = env.reset()
       state = np.identity(16)[state:state+1]
-      while not done:
+      while ((not done) and t < 15):
          #ACTION TO SET
          action = model.predict(state)
          new_state, reward, done, _ = take_action(np.argmax(action), env)
@@ -589,7 +597,7 @@ def main():
    # NNlearning(env)
    # DNNlearning(env)
    # DNNlearning_keras(env)
-   DDN_learning_keras_memoryReplay(env)
+   DDN_learning_keras_memoryReplay(env) #converged one time at 100 epochs
    
 
 
