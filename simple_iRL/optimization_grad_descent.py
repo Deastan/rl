@@ -176,7 +176,6 @@ def cal_cost_function_v2(list_demos, np_theta):
     return cost
     # end of cal_cost_function
 
-
 # Gradient descent function
 def grad_descent(list_demos, learning_rate=0.00001, iterations=25):
     '''
@@ -511,8 +510,6 @@ def features_states_simple(x,y):
 
     return np_features
 
-
-
 def plot(cost_history):
     '''
     Cost history. 
@@ -582,7 +579,6 @@ def rewardFunction_v2(np_theta, x, y):
     np_features = features_states(x,y)
     return np.dot(np_theta, np_features)
 
-
 def rewardGrid(np_theta):
     '''
     Show what is the reward for each state in the grid
@@ -629,10 +625,10 @@ def main():
         list_demos = pickle.load(f)
     
     print(list_demos)
-    print("Nombre de demos:", len(list_demos))
+    # print("Nombre de demos:", len(list_demos))
 
-    print("Nombre de point sur la trajectoire: ", len(list_demos[1]))
-    print(list_demos[0][2][1])
+    # print("Nombre de point sur la trajectoire: ", len(list_demos[1]))
+    # print(list_demos[0][2][1])
 
     # np_theta = np.array([10, 10])
     # print("Cost function: ", cal_cost_function(list_demos, np_theta))
@@ -651,7 +647,7 @@ def main():
 
     #show the gridReward
     # rewardGrid(np_theta)
-    # rewardGrid_v2(np_theta)
+    rewardGrid_v2(np_theta)
 
     print("Main end!")
 

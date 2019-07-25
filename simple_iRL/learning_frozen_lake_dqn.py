@@ -516,9 +516,9 @@ def experience_replay(model, memory,
 # Neural network with 2 hidden layer using Keras + experience replay
 def DDN_learning_keras_memoryReplay(env):
    '''
-   function which is a neural net using Keras
+   function which is a neural net using Keras with memory replay
    '''
-   EPISODE_MAX = 10
+   EPISODE_MAX = 30
    #PARAMS
    GAMMA = 0.95
    LEARNING_RATE = 0.001
