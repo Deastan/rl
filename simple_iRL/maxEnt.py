@@ -1,9 +1,12 @@
 # Jonathan Burkhard
 # IRL
+# Inspirared from https://github.com/MatthewJA/Inverse-Reinforcement-Learning/
+# and the thesis: https://www.cs.cmu.edu/~bziebart/publications/thesis-bziebart.pdf
 # help link :
 #               - https://towardsdatascience.com/gradient-descent-in-python-a0d07285742f
 #               - https://www.freecodecamp.org/news/understanding-gradient-descent-the-most-popular-ml-algorithm-a66c0d97307f/
 #               - https://ml-cheatsheet.readthedocs.io/en/latest/gradient_descent.html
+#               
 
 
 import random
@@ -66,39 +69,42 @@ def features_states(x, y):
     # list_demos[i][j][0]
     # list_demos[i][j][1]
 
-    # Try to add goal
-    int_start = 0
-    if x == 1 and y == 1:
-        int_start = 1
-    int_goal = 0
-    if x == 4 and y == 4:
-        int_goal = 1
-    int_hole = 0
-    if (x == 1 and y == 2) or (x == 4 and y == 2) or (x == 1 and y == 4):
-        # "4x4": [
-        # "SFFF",
-        # "FHFH",
-        # "FFFH",
-        # "HFFG"]
-        int_hole = 1
-    int_not_hole = 0
-    if not ((x == 2 and y == 2) or (x == 4 and y == 2) or (x == 1 and y == 4)):
-        # "4x4": [
-        # "SFFF",
-        # "FHFH",
-        # "FFFH",
-        # "HFFG"]
-        int_not_hole = 1
-    # int_proximity = 0
-    # if (x == 3 and y == 4):
-    #     int_proximity = 1
+    # # Try to add goal
+    # int_start = 0
+    # if x == 1 and y == 1:
+    #     int_start = 1
+    # int_goal = 0
+    # if x == 4 and y == 4:
+    #     int_goal = 1
+    # int_hole = 0
+    # if (x == 1 and y == 2) or (x == 4 and y == 2) or (x == 1 and y == 4):
+    #     # "4x4": [
+    #     # "SFFF",
+    #     # "FHFH",
+    #     # "FFFH",
+    #     # "HFFG"]
+    #     int_hole = 1
+    # int_not_hole = 0
+    # if not ((x == 2 and y == 2) or (x == 4 and y == 2) or (x == 1 and y == 4)):
+    #     # "4x4": [
+    #     # "SFFF",
+    #     # "FHFH",
+    #     # "FFFH",
+    #     # "HFFG"]
+    #     int_not_hole = 1
+    # # int_proximity = 0
+    # # if (x == 3 and y == 4):
+    # #     int_proximity = 1
 
-    np_features = np.zeros(2)
-    np_features[0] = x
-    np_features[1] = y
-    np_features = np.append(np_features, int_start)
-    np_features = np.append(np_features, int_goal)
-    np_features = np.append(np_features, int_not_hole)
+    # np_features = np.zeros(2)
+    # np_features[0] = x
+    # np_features[1] = y
+    # np_features = np.append(np_features, int_start)
+    # np_features = np.append(np_features, int_goal)
+    # np_features = np.append(np_features, int_not_hole)
+    # np_features = np.identity(16)
+    np_features = np.zeros(16,dtype=float)
+    np_features[utils.xy_to_state(x, y)] = 1
     return np_features
 
 def rewardFunction(np_theta, x, y):
@@ -106,23 +112,9 @@ def rewardFunction(np_theta, x, y):
     Return the reward for the theta, and the state
     '''
     np_features = features_states(x,y)
-    return np.dot(np_theta, np_features)
-
-def soft_max(x1, x2):
-    '''
-    Algo 9.2 of thesis : https://www.cs.cmu.edu/~bziebart/publications/thesis-bziebart.pdf
-    Algorithm 9.2
-    Soft-maximum calculationRequire:
-    inputsx1,x2
-    Ensure:softmax(x1,x2) = log (ex1+ex2)
-    1:maxx←max(x1,x2)
-    2:minx←min(x1,x2)
-    3:softmax(x1,x2)←maxx+ log(1 +eminx−maxx)
-    '''
-    max_x = max(x1, x2)
-    min_x = max(x1, x2)
-
-    return (max_x + math.log1p(1+math.exp(min_x) + math.exp(max_x)))
+    reward  = np.dot(np_theta, np_features)
+    # print(reward)
+    return reward
 
 def expected_state_visitation_frequency(list_demos, np_theta):
     '''
@@ -131,33 +123,73 @@ def expected_state_visitation_frequency(list_demos, np_theta):
     number_states = 16
     number_actions = 4
     
-    z_partition = np.zeros((number_states, number_actions), dtype=float)
-    z_partition_init = np.ones((number_states, number_actions), dtype=float)
-    for state in range(number_states):
-        for action in range(number_actions):
-            # print("here")
+    ### NOT CONVERGING
+    # Takken from the paper... but seem to diverged
+    # z_partition = np.zeros((number_states, number_actions), dtype=float)
+    # z_partition_init = np.ones((number_states, number_actions), dtype=float)
+    # for state in range(number_states):
+    #     for action in range(number_actions):
+    #         # print("here")
 
-            x, y = utils.state_to_xy(state)
-            next_state = next_state_calculation(state, action)
-            z_partition[state, action] += transition_probability(next_state, action, state) * math.exp(rewardFunction(np_theta, x, y)) * z_partition_init[next_state, action]
+    #         x, y = utils.state_to_xy(state)
+    #         next_state = next_state_calculation(state, action)
+    #         z_partition[state, action] += transition_probability(next_state, action, state) * math.exp(rewardFunction(np_theta, x, y)) * z_partition_init[next_state, action]
     
-    z_partition_state = np.zeros(number_states, dtype=float)
-    for state in range(number_states): 
-        for action in range(number_actions):
-            z_partition_state[state] += z_partition[state, action]
+    # z_partition_state = np.zeros(number_states, dtype=float)
+    # for state in range(number_states): 
+    #     for action in range(number_actions):
+    #         z_partition_state[state] += z_partition[state, action]
     
-    # Proba of action i to j knowing state i
-    policy = np.zeros((number_actions, number_states), dtype=float)
-    for state in range(number_states):
-        for action in range(number_actions):
-            policy[action, state] = z_partition[state, action]/z_partition_state[state]
+    # # Proba of action i to j knowing state i
+    # policy = np.zeros((number_actions, number_states), dtype=float)
+    # for state in range(number_states):
+    #     for action in range(number_actions):
+    #         policy[action, state] = z_partition[state, action]/z_partition_state[state]
 
+    # Value iteration calculation to find the policy
+    V = np.zeros(number_states, dtype=float)
+    # delta = V
+    GAMMA = 0.01
+    target_error = 0.01
+    reward_vector = np.zeros(number_states, dtype=float)
+    for i in range(0, number_states):
+        x, y = utils.state_to_xy(i)
+        reward_vector[i] = rewardFunction(np_theta, x, y)
+    
+    delta = float("inf")
+    while delta > target_error:
+        
+        delta = 0
+        for state in range(number_states):
+            max_v = float("-inf")
+            for action in range(number_actions):
+                sum = 0
+                for state_prime in range(number_states):
+                     
+                    sum += transition_probability(state_prime, action, state) * (reward_vector[state_prime]+GAMMA*V[state_prime])
+                    max_v = max(max_v, sum)
+            delta = max(delta, abs(V[state]-max_v))
+            V[state] =  max_v
+    # print(V)
+    # v is the vector contain the optimal value for each state
+    # print(V)
 
+    # Directly taken from https://github.com/MatthewJA/Inverse-Reinforcement-Learning/blob/master/irl/value_iteration.py
+    # Get Q using equation 9.2 from Ziebart's thesis.
+    Q = np.zeros((number_states, number_actions))
+    for i in range(number_states):
+        for j in range(number_actions):
+            sum = 0
+            for state_prime in range(number_states):
+                sum += transition_probability(state_prime, action, state) * (reward_vector[state_prime]+GAMMA*V[state_prime])
+            Q[i, j] = sum
+    Q -= Q.max(axis=1).reshape((number_states, 1))  # For numerical stability.
+    Q = np.exp(Q)/np.exp(Q).sum(axis=1).reshape((number_states, 1))
+
+    policy = Q.T
+    # return policy
     
     # expected_state_visitation_frequency
-    # proba_init_state_start = 1
-    # proba_init_state_other = 0
-    iterations = 1000 #(N)  in the paper
     iterations = len(list_demos)
     D = np.zeros((number_states, iterations), dtype = float)
 
@@ -189,10 +221,6 @@ def expected_state_visitation_frequency(list_demos, np_theta):
             D_vector[state] += D[state, i+1]
 
     return D_vector
-    # return expected_svf.sum(axis=1)
-
-
-
 
 def transition_probability(next_state, action, state):
     '''
@@ -207,21 +235,25 @@ def transition_probability(next_state, action, state):
     '''
     proba = 0
 
+    # left
     if action == 0:
-        if((state-1) == next_state and state != 4 and state != 8 and state != 12):
+        if((state-1) == next_state and state != 0 and state != 4 and state != 8 and state != 12):
             proba = 1
         else:
             proba = 0
+    # down
     elif action == 1:
         if((state+4) == next_state and state != 12 and state != 13 and state != 14 and state != 15):
             proba = 1
         else:
             proba = 0
+    # Right
     elif action == 2:
         if((state+1) == next_state and state != 3 and state != 7 and state != 11 and state != 15):
             proba = 1
         else:
             proba = 0
+    # Up
     elif action == 3:
         if((state-4) == next_state and state != 0 and state != 1 and state != 2 and state != 3):
             proba = 1
@@ -262,12 +294,12 @@ def maxEnt_optimization(list_demos):
     '''
     # parameters
     iterations = 10000
-    learning_rate = 0.00001
+    learning_rate = 100#0.1
 
     np_features_for_size = features_states(1, 1)
     np_theta = np.zeros(np_features_for_size.size)
     for i in range(np_features_for_size.size):
-        np_theta[i] = 10 * np.random.random_sample()
+        np_theta[i] = 1 * np.random.random_sample()
 
     # Compute f_tild
     f_tild = np.zeros((np_features_for_size.size), dtype=float)
@@ -308,7 +340,7 @@ def maxEnt_optimization(list_demos):
     for i in range(iterations):
         D_vector = expected_state_visitation_frequency(list_demos, np_theta)
 
-        grad_loss_function = f_tild - f_matrix.T.dot(D_vector)
+        grad_loss_function = f_tild - f_matrix.T.dot(D_vector)# because we maximuize
 
         np_theta = np_theta + learning_rate * grad_loss_function
         
@@ -338,9 +370,17 @@ def main():
 
     # print(expected_state_visitation_frequency(list_demos))
 
+    # # TEST EXPECTED...
+    # np_features_for_size = features_states(1, 1)
+    # np_theta = np.zeros(np_features_for_size.size)
+    # for i in range(np_features_for_size.size):
+    #     np_theta[i] = 1 * np.random.random_sample()
+    # print(expected_state_visitation_frequency(list_demos, np_theta))
+
+    #REAL OPTIMIZATION
     np_theta = maxEnt_optimization(list_demos)
-    print(np_theta)
-    utils.save(np_theta, name="test_on_euler")
+    # print(np_theta)
+    # utils.save(np_theta, name="test_on_euler")
     print("Main end!")
 
 #***********************************

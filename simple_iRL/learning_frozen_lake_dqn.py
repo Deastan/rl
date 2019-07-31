@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
 import math
+import utils
 
 
 # from openai_ros.openai_ros_common import StartOpenAI_ROS_Environment
@@ -30,6 +31,16 @@ from gym.envs.registration import register
 # https://www.tensorflow.org/api_docs/python/array_ops/slicing_and_joining#one_hot
 
 
+def learned_reward(state):
+   # list = [ 1.11729637, -0.54176631,  0.1075888,  -0.3647481,  -0.86694287, -1.81406677,
+   #          -0.04617524, -0.40689766,  0.3757524,   0.49293108,  0.57689633, -1.14852825,
+   #          -1.2579308,   0.71129337,  0.73235355,  2.33294411]
+   list = [ -1.11729637, -0.54176631,  -0.1075888,  -0.3647481,  -0.86694287, -1.81406677,
+            -0.04617524, -1.40689766,  -0.3757524,   -0.49293108,  -0.57689633, -1.14852825,
+            -1.2579308,   -0.71129337,  -0.73235355,  2.33294411]
+   return list[state]
+
+
 def take_action(action_1, env):
    new_state, reward_update, done, info = env.step(action_1)
 
@@ -44,6 +55,8 @@ def take_action(action_1, env):
    else:#if new_state == [0, 1, 2, 3, 4, 6, 8, 9, 10 , 13, 14]:
       reward_update = -0.1
    # print(new_state)
+   # print("new_state: ", new_state)
+   # reward_update = learned_reward(new_state)
    return new_state, reward_update, done, info
 
 def init_env():
@@ -425,8 +438,8 @@ def DNNlearning_keras(env):
 
    # Model params
    model = Sequential()
-   model.add(Dense(16, input_shape=(observation_space,), activation="relu"))
-   model.add(Dense(16, activation="relu"))
+   model.add(Dense(32, input_shape=(observation_space,), activation="relu"))
+   model.add(Dense(32, activation="relu"))
    model.add(Dense(action_space, activation="linear"))
    model.compile(loss="mse", optimizer=Adam(lr=LEARNING_RATE))
 
@@ -495,8 +508,9 @@ def save_forReplay(memory, state, action, reward, new_state, done):
 def experience_replay(model, memory, 
       BATCH_SIZE, exploration_rate, EXPLORATION_DECAY, EXPLORATION_MIN, GAMMA):
    if len(memory) < BATCH_SIZE:
-      return
+      return []
    batch = random.sample(memory, BATCH_SIZE)
+   loss = []
    # print(batch)
    for state, action, reward, new_state, done in batch:
       # print("Inside replay")
@@ -507,10 +521,12 @@ def experience_replay(model, memory,
 
       q_values = model.predict(state)
       q_values[0][action] = q_target
-      model.fit(state, q_values, verbose=1)#, callbacks=[tensorboard])
-
+      history = model.fit(state, q_values, verbose=0)#, callbacks=[tensorboard])
+      loss.append(history.history['loss'])
    exploration_rate *= EXPLORATION_DECAY
    exploration_rate = max(EXPLORATION_MIN, exploration_rate)
+
+   return loss
    # return model
 
 # Neural network with 2 hidden layer using Keras + experience replay
@@ -518,12 +534,12 @@ def DDN_learning_keras_memoryReplay(env):
    '''
    function which is a neural net using Keras with memory replay
    '''
-   EPISODE_MAX = 30
+   EPISODE_MAX = 10000
    #PARAMS
    GAMMA = 0.95
    LEARNING_RATE = 0.001
    MEMORY_SIZE = EPISODE_MAX
-   BATCH_SIZE = 20
+   BATCH_SIZE = 64
    EXPLORATION_MAX = 1.0
    EXPLORATION_MIN = 0.01
    EXPLORATION_DECAY = 0.995
@@ -547,6 +563,8 @@ def DDN_learning_keras_memoryReplay(env):
 
    episode_max = EPISODE_MAX
    done = False
+   list_loss = []
+   list_total_reward = []
    for i in range(episode_max):
       total_reward = 0
       j = 0
@@ -554,23 +572,40 @@ def DDN_learning_keras_memoryReplay(env):
       # state = np.reshape(state, [1, observation_space])
       state = np.identity(16)[state:state+1]
       done = False
+      loss = []
       while j < 15 and not done: # step inside an episode
          j+=1
-         print("[INFO]: episode: ", i, ", step: ", j)
+         
 
          action = choose_action(model, state, action_space, exploration_rate)
          # print(action)
          new_state, reward, done, info = take_action(action, env)
+         new_state_save = new_state
          new_state = np.identity(16)[new_state:new_state+1]
-
+         print("[INFO]: episode: ", i, ", step: ", j, ", Done: ", done, ", reward: ", reward, ", state: ", new_state_save, ", action: ", action)
          # Momory replay
          # memory = save_forReplay(memory, state, action, reward, new_state, done)
          save_forReplay(memory, state, action, reward, new_state, done)
-         experience_replay(model, memory, 
+         loss = experience_replay(model, memory, 
             BATCH_SIZE, exploration_rate, EXPLORATION_DECAY, EXPLORATION_MIN, GAMMA)
 
          state = new_state
          total_reward += reward
+      list_total_reward.append(total_reward)
+      if(loss != []):
+         list_loss = list_loss + loss
+   utils.save(list_loss, name="saves/list_loss")
+   utils.save(list_total_reward, name="saves/list_total_reward")
+   # print(list_loss)
+   # print("*********************")
+   # print(list_total_reward)
+   plt.subplot(1, 2, 1)
+   plt.plot(list_loss)
+   plt.title("List loss")
+   plt.subplot(1, 2, 2)
+   plt.plot(list_total_reward)
+   plt.title("List reward")
+   plt.show()
    
    #Test algo
    print("***********Prediction***************")
